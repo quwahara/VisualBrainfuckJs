@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <style>
+      body, button, input, textarea { font-size: medium; font-family: monospace; }
+      h3 { margin-top: 0; margin-bottom: 0; }
+      #stdin, #stdout { white-space: pre; }
+      #prg > div {
+        margin-bottom: 1px;
+        display:inline-block;
+        width: 30px;
+      }
+      #prg > div > div.idx, #prg > div > div.cmd {
+        margin: 0px -1px -1px 0px;
+        text-align: center;
+        border-style: solid;
+        border-width: 1px;
+        border-color: gray;
+      }
+      #mem > div {
+        margin-bottom: 1px;
+        width: 30px;
+        display:inline-block;
+      }
+      #mem > div > div.adr, #mem > div > div.dat, #mem > div > div.chr {
+        margin: 0px -1px -1px 0px;
+        white-space: pre;
+        text-align: center;
+        border-style: solid;
+        border-width: 1px;
+        border-color: gray;
+      }
+      div.row { width: 100%; min-height: 15px; }
+    </style>
+  </head>
+  <body>
+    <h3>Source</h3>
+    <textarea id="src" rows="3" cols="80"></textarea>
+    <div>
+      <button type="button" onclick="ctrl.loadSrc()">Load from localStorage</button>
+      <button type="button" onclick="ctrl.saveSrc()">Save to localStorage</button>
+      <button type="button" onclick="ctrl.clearSrc()">Clear</button>
+    </div>
+    <h3>Program</h3>
+    <div class="row">
+      <span>pc:</span><span id="pc"></span>
+      <span>prg[pc]:</span><span id="prgPc"></span>
+    </div>
+    <div id="prg"></div>
+    <h3>Memory</h3>
+    <div class="row">
+      <span>ptr:</span><span id="ptr"></span>
+      <span>mem[ptr]:</span><span id="memPtr"></span>
+    </div>
+    <div id="mem"></div>
+    <h3>stdin history</h3>
+    <div class="row" id="stdin"></div>
+    <h3>stdout</h3>
+    <div class="row" id="stdout">
+    </div>
+    <h3>Operation Buttons</h3>
+    <div>
+      <button type="button" onclick="ctrl.load()">Load from Source</button>
+      <button type="button" onclick="ctrl.restore()">Restore to Source</button>
+      <button type="button" onclick="ctrl.run()">Run</button>
+      <button type="button" onclick="ctrl.abort()">Abort</button>
+      <button type="button" onclick="ctrl.step()">Step</button>
+      <button type="button" onclick="ctrl.reset()">Reset</button>
+      <button type="button" onclick="ctrl.clear()">Clear</button>
+    </div>
+    <div>
+      <button type="button" onclick="ctrl.decPtr()">&lt;</button>
+      <button type="button" onclick="ctrl.incPtr()">&gt;</button>
+      <button type="button" onclick="ctrl.incDat()">+</button>
+      <button type="button" onclick="ctrl.decDat()">-</button>
+      <button type="button" onclick="ctrl.loopStart()">[</button>
+      <button type="button" onclick="ctrl.loopEnd()">]</button>
+      <button type="button" onclick="ctrl.input()">,</button>
+      <button type="button" onclick="ctrl.output()">.</button>
+    </div>
+    <div>
+      <span>Run Delay(ms)</span>
+      <input type="text" id="delay" value="1" size="3" />
+    </div>
+
+    <script type="text/javascript">
+    var elm = function(id) { return document.getElementById(id); }
+
+    function Brainfuck() {
+      var self = this, pc, prg, ptr, mem,
+      inputCallback = function() { return 0; }, // Signature to set the function
+      onOutput = function(byte) { } // Signature to set the function
+
+      self.memSize = 20
+      self.getPc = function() { return pc; }
+      self.getCmd = function() { return prg.length > 0 && pc >= 0 && pc < prg.length ? prg.charAt(pc) : null; }
+      self.getPrg = function() { return prg; }
+      self.setPrg = function(v) { prg = v }
+      self.getPtr = function() { return ptr; }
+      self.getMem = function() { return mem; }
+      self.getDat = function() { return mem.length > 0 && ptr >= 0 && ptr < mem.length ? mem[ptr] : null; }
+      self.setInputCallback = function(f) { inputCallback = f }
+      self.setOnOutput = function(f) { onOutput = f }
+      self.finished = function() { return prg.length === 0 || pc >= prg.length; }
+      self.reset = function() {
+        pc = -1
+        prg = ""
+        ptr = 0
+        mem = []
+        for(var i = 0; i < self.memSize; ++i) {
+          mem.push(0)
+        }
+      }
+      self.reset()
+      self.tick = function() {
+        if(prg.length === 0 || pc >= prg.length) {
+          return;
+        }
+        ++pc
+        switch (prg.charAt(pc)) {
+          case "+": self.incDat(); break;
+          case "-": self.decDat(); break;
+          case "<": self.decPtr(); break;
+          case ">": self.incPtr(); break;
+          case "[": self.loopStart(); break;
+          case "]": self.loopEnd(); break;
+          case ",": self.input(); break;
+          case ".": self.output(); break;
+          default: break;
+        }
+      }
+      self.incPtr = function() { ptr = ((ptr + 1) % 20) }
+      self.decPtr = function() { ptr = ((ptr - 1 + 20) % 20) }
+      self.incDat = function() { ++mem[ptr] }
+      self.decDat = function() { --mem[ptr] }
+      self.loopStart = function() {
+        if(mem[ptr] === 0) {
+          var c = 0, pc0 = pc
+          do {
+            if(pc >= prg.length) {
+              pc = pc0
+              break
+            }
+            if(prg.charAt(pc) === "[") { ++c }
+            if(prg.charAt(pc) === "]") { --c }
+            ++pc
+          } while (c !== 0);
+        }
+      }
+      self.loopEnd = function() {
+        if(mem[ptr] !== 0) {
+          var c = 0, pc0 = pc
+          do {
+            if(pc < 0) {
+              pc = pc0
+              break
+            }
+            if(prg.charAt(pc) === "[") { ++c }
+            if(prg.charAt(pc) === "]") { --c }
+            --pc
+          } while (c !== 0);
+        }
+      }
+      self.input = function() {
+        var v = inputCallback()
+        if(v >= 0 && v <= 255) {
+          mem[ptr] = v
+        }
+      }
+      self.output = function() {
+        onOutput(mem[ptr])
+      }
+      self.putCmd = function(cmd) {
+        if(pc >= prg.length) {
+          --pc
+        }
+        if(pc < 0) {
+          prg = cmd + prg
+        }
+        else {
+          var left = prg.substring(0, pc + 1),
+          right = prg.substring(pc + 1, prg.length)
+          prg = left + cmd + right
+        }
+      }
+    }
+
+    function View() {
+      var self = this,
+      toChr = function(byte) { return (byte < 32 || byte > 126) ? "?" : String.fromCharCode(byte); },
+      prgAt = function(pc) { return elm("p-" + pc); },
+      memAt = function(ptr) { return elm("m-" + ptr); },
+      blinkOn = function(element) {
+        if(element) {
+          element.style.backgroundColor = "yellow"
+        }
+      },
+      blinkOff = function(element) {
+        if(element) {
+          element.style.backgroundColor = ""
+        }
+      },
+      blinkingPrg, blinkingMem
+      self.blinkPrgAt = function(pc) {
+        blinkOff(blinkingPrg)
+        blinkingPrg = prgAt(pc)
+        blinkOn(blinkingPrg)
+      }
+      self.blinkMemAt = function(ptr) {
+        blinkOff(blinkingMem)
+        blinkingMem = memAt(ptr)
+        blinkOn(blinkingMem)
+      }
+
+      self.getSrc = function() { return elm("src").value; }
+      self.setSrc = function(v) { elm("src").value = v }
+      self.setPc = function(pc, cmd) {
+        elm("pc").innerText = pc
+        elm("prgPc").innerText = cmd
+      }
+      self.setPtr = function(ptr, dat) {
+        elm("ptr").innerText = ptr
+        elm("memPtr").innerText = dat
+      }
+      self.loadPrg = function(prg) {
+        var h = ""
+        h += "<div>"
+        h += "<div class='idx'>Idx</div>"
+        h += "<div class='cmd'>Cmd</div>"
+        h += "</div>"
+        for(var i = 0; i < prg.length; ++i) {
+          //h += "<div id='p-" + i + "'>" + prg.charAt(i) + "</div>"
+          h += "<div id='p-" + i + "'>"
+          h += "<div class='idx'>" + i + "</div>"
+          h += "<div class='cmd'>" + prg.charAt(i) + "</div>"
+          h += "</div>"
+        }
+        elm("prg").innerHTML = h
+      }
+      self.loadMem = function(mem) {
+        var h
+        h = ""
+        h += "<div>"
+        h += "<div class='adr'>Adr</div>"
+        h += "<div class='dat'>Dat</div>"
+        h += "<div class='chr'>Chr</div>"
+        h += "</div>"
+        elm("mem").innerHTML = h
+        for(var i = 0; i < mem.length; ++i) {
+          h = ""
+          h += "<div id='m-" + i + "'>"
+          h += "<div class='adr'>" + i + "</div>"
+          h += "<div class='dat'></div>"
+          h += "<div class='chr'></div>"
+          h += "</div>"
+          elm("mem").innerHTML += h
+          self.setMemAt(i, mem[i])
+        }
+      }
+      self.refreshView = function(pc, cmd, ptr, dat, prg, mem) {
+        self.setPc(pc, cmd)
+        self.setPtr(ptr, dat)
+        blinkOff(blinkingPrg)
+        blinkOff(blinkingMem)
+        self.loadPrg(prg)
+        self.loadMem(mem)
+        elm("stdin").innerText = ""
+        elm("stdout").innerText = ""
+      }
+      self.setMemAt = function(ptr, dat) {
+        memAt(ptr).getElementsByClassName("dat")[0].innerText = dat
+        memAt(ptr).getElementsByClassName("chr")[0].innerText = toChr(dat)
+      }
+      self.stdin = function(c) {
+        elm("stdin").innerText += c
+      }
+      self.print = function(byte) {
+        var c = (byte < 32 || byte > 126) ? "?" : String.fromCharCode(byte);
+        elm("stdout").innerText += c
+      }
+      self.getDelay = function() {
+        return elm("delay").value;
+      }
+    }
+
+    function Ctrl(view, bf) {
+      var self = this, abort = false
+      view.setSrc(localStorage.getItem("src") || "")
+      bf.setInputCallback(function() {
+        var s = prompt("何か1文字を入れて下さい");
+        if(!s || s.length === 0) {
+          abort = true
+          alert("入力が無かったので、中止しました")
+          return -1;
+        }
+        else {
+          view.stdin(s.charAt(0))
+          return s.charCodeAt(0);
+        }
+      })
+      bf.setOnOutput(view.print)
+      self.loadSrc = function() {
+        view.setSrc(localStorage.getItem("src") || "")
+      }
+      self.saveSrc = function() {
+        localStorage.setItem("src", view.getSrc())
+      }
+      self.clearSrc = function() {
+        view.setSrc("")
+      }
+      self.load = function() {
+        bf.reset()
+        var src = view.getSrc(), prg = ""
+        for(var i = 0; i < src.length; ++i) {
+          var c = src.charAt(i)
+          if(["+", "-", "<", ">", "[", "]", ",", "."].indexOf(c) >= 0) {
+            prg += c
+          }
+        }
+        bf.setPrg(prg)
+        self.refreshView()
+      }
+      self.restore = function() {
+        view.setSrc(bf.getPrg())
+      }
+      self.run = function() {
+        self.reset()
+        var delay = parseInt(view.getDelay())
+        function run() {
+          if(abort || bf.finished()) {
+            return;
+          }
+          self.step()
+          setTimeout(run, delay)
+        }
+        run()
+      }
+      self.abort = function() {
+        abort = true
+      }
+      self.step = function() {
+        bf.tick()
+        view.setPc(bf.getPc(), bf.getCmd())
+        view.blinkPrgAt(bf.getPc())
+        view.setPtr(bf.getPtr(), bf.getDat())
+        view.setMemAt(bf.getPtr(), bf.getDat())
+        view.blinkMemAt(bf.getPtr())
+      }
+      self.reset = function() {
+        var prg = bf.getPrg()
+        bf.reset()
+        bf.setPrg(prg)
+        abort = false
+        self.refreshView()
+      }
+      self.clear = function() {
+        bf.reset()
+        abort = false
+        self.refreshView()
+      }
+      self.decPtr = function() { self.putCmd("<") }
+      self.incPtr = function() { self.putCmd(">") }
+      self.incDat = function() { self.putCmd("+") }
+      self.decDat = function() { self.putCmd("-") }
+      self.loopStart = function() { self.putCmd("[") }
+      self.loopEnd = function() { self.putCmd("]") }
+      self.input = function() { self.putCmd(",") }
+      self.output = function() { self.putCmd(".") }
+      self.putCmd = function(cmd) {
+        bf.putCmd(cmd)
+        view.loadPrg(bf.getPrg())
+        self.step()
+      }
+      self.refreshView = function() {
+        view.refreshView(bf.getPc(), bf.getCmd(), bf.getPtr(), bf.getDat(), bf.getPrg(), bf.getMem())
+      }
+      self.load()
+    }
+    var ctrl = new Ctrl(new View(), new Brainfuck())
+    </script>
+  </body>
+</html>
