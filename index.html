@@ -42,6 +42,7 @@
       <button type="button" onclick="ctrl.loadSrc()">Load from localStorage</button>
       <button type="button" onclick="ctrl.saveSrc()">Save to localStorage</button>
       <button type="button" onclick="ctrl.clearSrc()">Clear</button>
+      <button type="button" onclick="ctrl.ex1ToSrc()">Ex.1 3x Loop</button>
     </div>
     <h3>Program</h3>
     <div class="row">
@@ -329,6 +330,9 @@
       }
       self.clearSrc = function() {
         view.setSrc("")
+      }
+      self.ex1ToSrc = function() {
+        view.setSrc("+++[>++<-]")
       }
       self.load = function() {
         bf.reset()
