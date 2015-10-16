@@ -2,10 +2,15 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title></title>
+    <title>Visual Brainf*ck JS</title>
     <style>
       body, button, input, textarea { font-size: medium; font-family: monospace; }
-      h3 { margin-top: 0; margin-bottom: 0; }
+      h3 { margin-bottom: 0; }
+      h4 { margin-bottom: 0; }
+      div.sec-desc { margin-bottom: 8px; }
+      div.word { font-weight: bold; width: 250px; background-color: whitesmoke; margin: 4px 4px 4px 4px; padding: 4px 4px 4px 4px; }
+      div.desc { margin: -28px 0 4px 300px; padding: 4px 4px 4px 4px; }
+
       #stdin, #stdout { white-space: pre; }
       #prg > div {
         margin-bottom: 1px;
@@ -36,6 +41,7 @@
     </style>
   </head>
   <body>
+    <h2>Visual Brainf*ck JS</h2>
     <h3>Source</h3>
     <textarea id="src" rows="3" cols="80"></textarea>
     <div>
@@ -84,6 +90,7 @@
     <div>
       <span>Run Delay(ms)</span>
       <input type="text" id="delay" value="100" size="5" />
+      <span>1 upto 10000</span>
     </div>
 
     <script type="text/javascript">
@@ -304,6 +311,9 @@
       self.getDelay = function() {
         return elm("delay").value;
       }
+      self.setDelay = function(v) {
+        elm("delay").value = v;
+      }
     }
 
     function Ctrl(view, bf) {
@@ -353,6 +363,7 @@
         self.reset()
         var d = parseInt(view.getDelay())
         var delay = Math.min((isNaN(d) || d <= 0 ? 100 : d), 10000)
+        view.setDelay(delay)
         function run() {
           if(abort || bf.finished()) {
             return;
@@ -405,5 +416,253 @@
     }
     var ctrl = new Ctrl(new View(), new Brainfuck())
     </script>
+
+    <h2>使い方</h2>
+    <div>Ex.1 3x Loopボタンを押して下さい。3回ループのサンプルコードがSourceに読み込まれます。</div>
+    <br/>
+    <div>Load from Sourceボタンを押して下さい。SourceからProgramに、コードを読み込みます。</div>
+    <br/>
+    <div>Runボタンを押して下さい。Programのコードが実行されます。</div>
+    <br/>
+
+    <h2>How to use</h2>
+    <div>Please push the "Ex. 1 3x Loop" button. Example code of 3 times loop will be loaded to the Source.</div>
+    <br/>
+    <div>Push the "Load from Source" button. It will load the code to Program section from Source section.</div>
+    <br/>
+    <div>Push the "Run" button. The code in Program section will be executed.</div>
+    <br/>
+
+    <h2>説明</h2>
+    <h3>Source</h3>
+    <div class="sec-desc">コードを編集するところです。ここのコードは実行されません。</div>
+    <div>
+      <div class="word">Load from localStorageボタン</div>
+      <div class="desc">ブラウザに保存されたコードを読み込みます。</div>
+    </div>
+    <div>
+      <div class="word">Save to localStorageボタン</div>
+      <div class="desc">コードをブラウザに保存します。</div>
+    </div>
+    <div>
+      <div class="word">Clearボタン</div>
+      <div class="desc">編集領域を空にします。</div>
+    </div>
+    <div>
+      <div class="word">Ex.1 3x Loopボタン</div>
+      <div class="desc">3回ループのサンプルコードがSourceに読み込まれます。0番地をループカウンタにして、1番地で2✕3を計算します。</div>
+    </div>
+    <h3>Program</h3>
+    <div class="sec-desc">実行されるコードです。</div>
+    <div>
+      <div class="word">pc</div>
+      <div class="desc">プログラムカウンター。注目しているコマンドの位置です。</div>
+    </div>
+    <div>
+      <div class="word">prg[pc]</div>
+      <div class="desc">プログラムカウンターの位置にあるコマンドです。</div>
+    </div>
+    <div>
+      <div class="word">Idx</div>
+      <div class="desc">コマンドの位置です。</div>
+    </div>
+    <div>
+      <div class="word">Cmd</div>
+      <div class="desc">コマンドです。</div>
+    </div>
+    <h3>Memory</h3>
+    <div class="sec-desc">メモリーです。見やすさのために大きさを20にしています。</div>
+    <div>
+      <div class="word">ptr</div>
+      <div class="desc">ポインターです。</div>
+    </div>
+    <div>
+      <div class="word">mem[ptr]</div>
+      <div class="desc">ポインターが指すメモリーのデータです。</div>
+    </div>
+    <div>
+      <div class="word">Adr</div>
+      <div class="desc">メモリーアドレスです。</div>
+    </div>
+    <div>
+      <div class="word">Dat</div>
+      <div class="desc">データです。</div>
+    </div>
+    <div>
+      <div class="word">Chr</div>
+      <div class="desc">データに当たるASCII文字です。</div>
+    </div>
+    <h3>stdin history</h3>
+    <div class="sec-desc">入力した文字の履歴です。</div>
+    <h3>stdout</h3>
+    <div class="sec-desc">出力です。</div>
+
+    <h3>Operation Buttons</h3>
+    <div class="sec-desc">Brainf*ck Interpreterを操作するボタンです。</div>
+    <div>
+      <div class="word">Load from Source</div>
+      <div class="desc">SourceからProgramに、コードを読み込みます。</div>
+    </div>
+    <div>
+      <div class="word">Restore to Source</div>
+      <div class="desc">ProgramからSourceに、コードを戻します。</div>
+    </div>
+    <div>
+      <div class="word">Run</div>
+      <div class="desc">コードを実行します。</div>
+    </div>
+    <div>
+      <div class="word">Abort</div>
+      <div class="desc">実行を中断します。Runによる実行中でなければ、このボタンは働きません。</div>
+    </div>
+    <div>
+      <div class="word">Step</div>
+      <div class="desc">pcを1つ進めて、その位置のCmdを実行します。Loopの最中では、対応する角括弧を探します。</div>
+    </div>
+    <div>
+      <div class="word">Reset</div>
+      <div class="desc">pcやptr、memを初期化します。</div>
+    </div>
+    <div>
+      <div class="word">Clear</div>
+      <div class="desc">コードや、pc、ptr、memを初期化します。</div>
+    </div>
+    <div>
+      <div class="word">&lt; &gt;  +  -  [  ]  ,  .</div>
+      <div class="desc">現在のpcの位置に該当するCmdを足して、実行します。「]」を足した後はStepを押し、Loopを戻る操作をして下さい。</div>
+    </div>
+    <div>
+      <div class="word">Run Delay(ms)</div>
+      <div class="desc">Runによる実行で、Cmdを1つ実行した後に待機する時間を指定します。変化を見やすくするためです。1から10000の間が指定できます。</div>
+    </div>
+
+    <h2>Reference</h2>
+    <h3>Source</h3>
+    <div class="sec-desc">The edit area for code. You cannot execute code in this area.</div>
+    <div>
+      <div class="word">Load from localStorage button</div>
+      <div class="desc">Load code saved in browser.</div>
+    </div>
+    <div>
+      <div class="word">Save to localStorage button</div>
+      <div class="desc">Save code to browser.</div>
+    </div>
+    <div>
+      <div class="word">Clear button</div>
+      <div class="desc">Clear the edit area.</div>
+    </div>
+    <div>
+      <div class="word">Ex.1 3x Loop button</div>
+      <div class="desc">Loads Example code, 3 times loop, to the Source. The code calculates 2 times 3 in address 1 by address 0 as a loop counter.</div>
+    </div>
+    <h3>Program</h3>
+    <div class="sec-desc">Code to execute.</div>
+    <div>
+      <div class="word">pc</div>
+      <div class="desc">Program counter. Position of interested command.</div>
+    </div>
+    <div>
+      <div class="word">prg[pc]</div>
+      <div class="desc">Pointed command by the program counter.</div>
+    </div>
+    <div>
+      <div class="word">Idx</div>
+      <div class="desc">Index of commands.</div>
+    </div>
+    <div>
+      <div class="word">Cmd</div>
+      <div class="desc">Commands</div>
+    </div>
+    <h3>Memory</h3>
+    <div class="sec-desc">The memory. The size is 20 to be good for view.</div>
+    <div>
+      <div class="word">ptr</div>
+      <div class="desc">The pointer</div>
+    </div>
+    <div>
+      <div class="word">mem[ptr]</div>
+      <div class="desc">The data pointed by pointer.</div>
+    </div>
+    <div>
+      <div class="word">Adr</div>
+      <div class="desc">The address</div>
+    </div>
+    <div>
+      <div class="word">Dat</div>
+      <div class="desc">The data</div>
+    </div>
+    <div>
+      <div class="word">Chr</div>
+      <div class="desc">Ascii characters of the data value.</div>
+    </div>
+    <h3>stdin history</h3>
+    <div class="sec-desc">History of input characters.</div>
+    <h3>stdout</h3>
+    <div class="sec-desc">The outputs</div>
+
+    <h3>Operation Buttons</h3>
+    <div class="sec-desc">The operation buttons for Brainf*ck Interpreter.</div>
+    <div>
+      <div class="word">Load from Source</div>
+      <div class="desc">Load code to Program from Source.</div>
+    </div>
+    <div>
+      <div class="word">Restore to Source</div>
+      <div class="desc">Restore code to Source from Program.</div>
+    </div>
+    <div>
+      <div class="word">Run</div>
+      <div class="desc">Run the code.</div>
+    </div>
+    <div>
+      <div class="word">Abort</div>
+      <div class="desc">Abort execution. This button works while executing by run button only.</div>
+    </div>
+    <div>
+      <div class="word">Step</div>
+      <div class="desc">Advances program counter one step and execute command at the program counter is pointing. In a loop, it searches other square bracket to be paired.</div>
+    </div>
+    <div>
+      <div class="word">Reset</div>
+      <div class="desc">Initialize pc, ptr and mem.</div>
+    </div>
+    <div>
+      <div class="word">Clear</div>
+      <div class="desc">Initialize Program, pc, ptr and mem.</div>
+    </div>
+    <div>
+      <div class="word">&lt; &gt;  +  -  [  ]  ,  .</div>
+      <div class="desc">Adding the commadn at position of program counter, then execute it. After "]" button pushed, push the Step button to go back the loop.</div>
+    </div>
+    <div>
+      <div class="word">Run Delay(ms)</div>
+      <div class="desc">Set wait time after execution one command by Run button. This is to watch good. You can set 1 up to 10000. </div>
+    </div>
+
+    <h2>License</h2>
+    <div style="white-space: pre;">
+    The MIT License (MIT)
+
+    Copyright (c) 2015 Mitsuaki Kuwahara
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    THE SOFTWARE.
+    </div>
+
   </body>
 </html>
