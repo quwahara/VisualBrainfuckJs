@@ -82,14 +82,14 @@
     </div>
     <div>
       <span>Run Delay(ms)</span>
-      <input type="text" id="delay" value="100" size="3" />
+      <input type="text" id="delay" value="100" size="5" />
     </div>
 
     <script type="text/javascript">
     var elm = function(id) { return document.getElementById(id); }
 
     function Brainfuck() {
-      var self = this, pc, prg, ptr, mem,
+      var self = this, pc, prg, ptr, mem, pending = null,
       inputCallback = function() { return 0; }, // Signature to set the function
       onOutput = function(byte) { } // Signature to set the function
 
@@ -104,6 +104,7 @@
       self.setInputCallback = function(f) { inputCallback = f }
       self.setOnOutput = function(f) { onOutput = f }
       self.finished = function() { return prg.length === 0 || pc >= prg.length; }
+      self.isPending = function() { return !!pending; }
       self.reset = function() {
         pc = -1
         prg = ""
@@ -116,6 +117,11 @@
       self.reset()
       self.tick = function() {
         if(prg.length === 0 || pc >= prg.length) {
+          return;
+        }
+        if(pending) {
+          // Search loop start or end in tick by tick
+          pending()
           return;
         }
         ++pc
@@ -137,30 +143,46 @@
       self.decDat = function() { --mem[ptr] }
       self.loopStart = function() {
         if(mem[ptr] === 0) {
-          var c = 0, pc0 = pc
-          do {
-            if(pc >= prg.length) {
-              pc = pc0
-              break
-            }
-            if(prg.charAt(pc) === "[") { ++c }
-            if(prg.charAt(pc) === "]") { --c }
-            ++pc
-          } while (c !== 0);
+          pending = (function() {
+            var c = 0, pc0 = pc
+            return function() {
+              if(pc >= prg.length) {
+                pc = pc0
+                pending = null
+                if(pc !== (prg.length - 1)) {
+                  console.log("[ was unmatch.")
+                }
+                return;
+              }
+              if(prg.charAt(pc) === "[") { ++c }
+              if(prg.charAt(pc) === "]") { --c }
+              ++pc
+              if(c === 0) {
+                pending = null
+              }
+            };
+          })();
         }
       }
       self.loopEnd = function() {
         if(mem[ptr] !== 0) {
-          var c = 0, pc0 = pc
-          do {
-            if(pc < 0) {
-              pc = pc0
-              break
-            }
-            if(prg.charAt(pc) === "[") { ++c }
-            if(prg.charAt(pc) === "]") { --c }
-            --pc
-          } while (c !== 0);
+          pending = (function() {
+            var c = 0, pc0 = pc
+            return function() {
+              if(pc < 0) {
+                pc = pc0
+                pending = null
+                console.log("] was unmatch.")
+                return;
+              }
+              if(prg.charAt(pc) === "[") { ++c }
+              if(prg.charAt(pc) === "]") { --c }
+              --pc
+              if(c === 0) {
+                pending = null
+              }
+            };
+          })();
         }
       }
       self.input = function() {
@@ -192,9 +214,9 @@
       toChr = function(byte) { return (byte < 32 || byte > 126) ? "?" : String.fromCharCode(byte); },
       prgAt = function(pc) { return elm("p-" + pc); },
       memAt = function(ptr) { return elm("m-" + ptr); },
-      blinkOn = function(element) {
+      blinkOn = function(element, color) {
         if(element) {
-          element.style.backgroundColor = "yellow"
+          element.style.backgroundColor = color || "yellow"
         }
       },
       blinkOff = function(element) {
@@ -203,10 +225,10 @@
         }
       },
       blinkingPrg, blinkingMem
-      self.blinkPrgAt = function(pc) {
+      self.blinkPrgAt = function(pc, isPending) {
         blinkOff(blinkingPrg)
         blinkingPrg = prgAt(pc)
-        blinkOn(blinkingPrg)
+        blinkOn(blinkingPrg, isPending ? "magenta" : "yellow")
       }
       self.blinkMemAt = function(ptr) {
         blinkOff(blinkingMem)
@@ -287,10 +309,10 @@
       var self = this, abort = false
       view.setSrc(localStorage.getItem("src") || "")
       bf.setInputCallback(function() {
-        var s = prompt("何か1文字を入れて下さい");
+        var s = prompt("何か1文字を入れて下さい\nPlease input something one character.");
         if(!s || s.length === 0) {
           abort = true
-          alert("入力が無かったので、中止しました")
+          alert("入力が無かったので、中止しました\nAborted because of no input.")
           return -1;
         }
         else {
@@ -342,7 +364,7 @@
       self.step = function() {
         bf.tick()
         view.setPc(bf.getPc(), bf.getCmd())
-        view.blinkPrgAt(bf.getPc())
+        view.blinkPrgAt(bf.getPc(), bf.isPending())
         view.setPtr(bf.getPtr(), bf.getDat())
         view.setMemAt(bf.getPtr(), bf.getDat())
         view.blinkMemAt(bf.getPtr())
