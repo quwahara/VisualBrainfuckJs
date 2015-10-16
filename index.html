@@ -82,7 +82,7 @@
     </div>
     <div>
       <span>Run Delay(ms)</span>
-      <input type="text" id="delay" value="1" size="3" />
+      <input type="text" id="delay" value="100" size="3" />
     </div>
 
     <script type="text/javascript">
@@ -213,7 +213,6 @@
         blinkingMem = memAt(ptr)
         blinkOn(blinkingMem)
       }
-
       self.getSrc = function() { return elm("src").value; }
       self.setSrc = function(v) { elm("src").value = v }
       self.setPc = function(pc, cmd) {
@@ -231,7 +230,6 @@
         h += "<div class='cmd'>Cmd</div>"
         h += "</div>"
         for(var i = 0; i < prg.length; ++i) {
-          //h += "<div id='p-" + i + "'>" + prg.charAt(i) + "</div>"
           h += "<div id='p-" + i + "'>"
           h += "<div class='idx'>" + i + "</div>"
           h += "<div class='cmd'>" + prg.charAt(i) + "</div>"
@@ -327,7 +325,8 @@
       }
       self.run = function() {
         self.reset()
-        var delay = parseInt(view.getDelay())
+        var d = parseInt(view.getDelay())
+        var delay = Math.min((isNaN(d) || d <= 0 ? 100 : d), 10000)
         function run() {
           if(abort || bf.finished()) {
             return;
