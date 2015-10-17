@@ -47,7 +47,7 @@
     <div>「Poke」ボタンを押して下さい。SourceのコードをProgramに書き込みます。</div>
     <div>Runボタンを押して下さい。Programのコードが実行されます。</div>
     <h2>How to use</h2>
-    <div>Please push the "Ex. 1 3x Loop" button. Example code of 3 times loop will be loaded to the Source.</div>
+    <div>Please push the "Ex. 1 3x Loop" button. Example code of 3 times loop will be loaded to Source.</div>
     <div>Push the "Poke" button. It pokes the code in Source into Program.</div>
     <div>Push the "Run" button. The code in Program section will be executed.</div>
 
@@ -55,12 +55,12 @@
     <h3>Source</h3>
     <textarea id="src" rows="3" cols="80"></textarea>
     <div>
-      <button type="button" onclick="ctrl.clearSrc()">Clear</button>
       <button type="button" onclick="ctrl.ex1ToSrc()">Ex.1 3x Loop</button>
       <button type="button" onclick="ctrl.poke()">Poke</button>
       <button type="button" onclick="ctrl.peek()">Peek</button>
       <button type="button" onclick="ctrl.save()">Save</button>
       <button type="button" onclick="ctrl.load()">Load</button>
+      <button type="button" onclick="ctrl.clearSrc()">Clear</button>
     </div>
     <h3>Program</h3>
     <div class="row">
@@ -342,9 +342,6 @@
         }
       })
       bf.setOnOutput(view.print)
-      self.clearSrc = function() {
-        view.setSrc("")
-      }
       self.ex1ToSrc = function() {
         view.setSrc("+++[>++<-]")
       }
@@ -368,6 +365,9 @@
       }
       self.load = function() {
         view.setSrc(localStorage.getItem("src") || "")
+      }
+      self.clearSrc = function() {
+        view.setSrc("")
       }
       self.run = function() {
         self.reset()
@@ -431,11 +431,7 @@
     <h3>Source</h3>
     <div class="sec-desc">コードを編集するところです。ここのコードは実行されません。</div>
     <div>
-      <div class="word">Clearボタン</div>
-      <div class="desc">編集領域を空にします。</div>
-    </div>
-    <div>
-      <div class="word">Ex.1 3x Loopボタン</div>
+      <div class="word">Ex.1 3x Loop</div>
       <div class="desc">3回ループのサンプルコードがSourceに読み込まれます。0番地をループカウンタにして、1番地で2✕3を計算します。</div>
     </div>
     <div>
@@ -447,12 +443,16 @@
       <div class="desc">ProgramのコードをSourceに読み戻します。</div>
     </div>
     <div>
-      <div class="word">Saveボタン</div>
+      <div class="word">Save</div>
       <div class="desc">コードをブラウザに保存します。</div>
     </div>
     <div>
-      <div class="word">Loadボタン</div>
+      <div class="word">Load</div>
       <div class="desc">ブラウザに保存されたコードを読み込みます。</div>
+    </div>
+    <div>
+      <div class="word">Clear</div>
+      <div class="desc">編集領域を空にします。</div>
     </div>
     <h3>Program</h3>
     <div class="sec-desc">実行されるコードです。</div>
@@ -534,11 +534,7 @@
     <h3>Source</h3>
     <div class="sec-desc">The edit area for code. You cannot execute code in this area.</div>
     <div>
-      <div class="word">Clear button</div>
-      <div class="desc">Clear the edit area.</div>
-    </div>
-    <div>
-      <div class="word">Ex.1 3x Loop button</div>
+      <div class="word">Ex.1 3x Loop</div>
       <div class="desc">Loads Example code, 3 times loop, to the Source. The code calculates 2 times 3 in address 1 by address 0 as a loop counter.</div>
     </div>
     <div>
@@ -550,12 +546,16 @@
       <div class="desc">Peeks the code in Program into Source.</div>
     </div>
     <div>
-      <div class="word">Save button</div>
+      <div class="word">Save</div>
       <div class="desc">Save code to browser.</div>
     </div>
     <div>
-      <div class="word">Load button</div>
+      <div class="word">Load</div>
       <div class="desc">Load code saved in browser.</div>
+    </div>
+    <div>
+      <div class="word">Clear</div>
+      <div class="desc">Clear the edit area.</div>
     </div>
     <h3>Program</h3>
     <div class="sec-desc">Code to execute.</div>
