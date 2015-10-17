@@ -275,7 +275,7 @@
         elm("ptr").innerText = ptr
         elm("memPtr").innerText = dat
       }
-      self.loadPrg = function(prg) {
+      self.initPrg = function(prg) {
         var h = ""
         h += "<div>"
         h += "<div class='idx'>Idx</div>"
@@ -289,7 +289,7 @@
         }
         elm("prg").innerHTML = h
       }
-      self.loadMem = function(mem) {
+      self.initMem = function(mem) {
         var h
         h = ""
         h += "<div>"
@@ -314,8 +314,8 @@
         self.setPtr(ptr, dat)
         blinkOff(blinkingPrg)
         blinkOff(blinkingMem)
-        self.loadPrg(prg)
-        self.loadMem(mem)
+        self.initPrg(prg)
+        self.initMem(mem)
         elm("stdin").innerText = ""
         elm("stdout").innerText = ""
       }
@@ -428,7 +428,7 @@
       self.output = function() { self.putCmd(".") }
       self.putCmd = function(cmd) {
         bf.putCmd(cmd)
-        view.loadPrg(bf.getPrg())
+        view.initPrg(bf.getPrg())
         self.step()
       }
       self.refreshView = function() {
