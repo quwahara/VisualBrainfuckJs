@@ -55,12 +55,12 @@
     <h3>Source</h3>
     <textarea id="src" rows="3" cols="80"></textarea>
     <div>
-      <button type="button" onclick="ctrl.loadSrc()">Load from localStorage</button>
       <button type="button" onclick="ctrl.saveSrc()">Save to localStorage</button>
       <button type="button" onclick="ctrl.clearSrc()">Clear</button>
       <button type="button" onclick="ctrl.ex1ToSrc()">Ex.1 3x Loop</button>
       <button type="button" onclick="ctrl.poke()">Poke</button>
       <button type="button" onclick="ctrl.peek()">Peek</button>
+      <button type="button" onclick="ctrl.load()">Load</button>
     </div>
     <h3>Program</h3>
     <div class="row">
@@ -342,7 +342,7 @@
         }
       })
       bf.setOnOutput(view.print)
-      self.loadSrc = function() {
+      self.load = function() {
         view.setSrc(localStorage.getItem("src") || "")
       }
       self.saveSrc = function() {
@@ -431,10 +431,6 @@
     <h3>Source</h3>
     <div class="sec-desc">コードを編集するところです。ここのコードは実行されません。</div>
     <div>
-      <div class="word">Load from localStorageボタン</div>
-      <div class="desc">ブラウザに保存されたコードを読み込みます。</div>
-    </div>
-    <div>
       <div class="word">Save to localStorageボタン</div>
       <div class="desc">コードをブラウザに保存します。</div>
     </div>
@@ -453,6 +449,10 @@
     <div>
       <div class="word">Peek</div>
       <div class="desc">ProgramのコードをSourceに読み戻します。</div>
+    </div>
+    <div>
+      <div class="word">Loadボタン</div>
+      <div class="desc">ブラウザに保存されたコードを読み込みます。</div>
     </div>
     <h3>Program</h3>
     <div class="sec-desc">実行されるコードです。</div>
@@ -534,10 +534,6 @@
     <h3>Source</h3>
     <div class="sec-desc">The edit area for code. You cannot execute code in this area.</div>
     <div>
-      <div class="word">Load from localStorage button</div>
-      <div class="desc">Load code saved in browser.</div>
-    </div>
-    <div>
       <div class="word">Save to localStorage button</div>
       <div class="desc">Save code to browser.</div>
     </div>
@@ -556,6 +552,10 @@
     <div>
       <div class="word">Peek</div>
       <div class="desc">Peeks the code in Program into Source.</div>
+    </div>
+    <div>
+      <div class="word">Load button</div>
+      <div class="desc">Load code saved in browser.</div>
     </div>
     <h3>Program</h3>
     <div class="sec-desc">Code to execute.</div>
