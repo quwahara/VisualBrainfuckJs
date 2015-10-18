@@ -322,7 +322,7 @@
         elm("stdin").innerText += c
       }
       self.print = function(byte) {
-        var c = (byte < 32 || byte > 126) ? "?" : String.fromCharCode(byte);
+        var c = (byte === 9 || byte === 10 || byte === 13 || (32 <= byte && byte <= 126)) ? String.fromCharCode(byte) : "?";
         elm("stdout").innerText += c
       }
       self.getDelay = function() {
