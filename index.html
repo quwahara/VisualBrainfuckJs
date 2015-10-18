@@ -109,16 +109,22 @@
       <input type="text" id="delay" value="100" size="5" />
       <span>1 upto 10000</span>
     </div>
+    <div>
+      <span>Memory Size</span>
+      <input type="text" id="memSize" value="20" size="5" />
+      <span>20 upto 10000</span>
+    </div>
 
     <script type="text/javascript">
     var elm = function(id) { return document.getElementById(id); }
 
     function Brainfuck() {
-      var self = this, pc, prg, ptr, mem, pending = null,
+      var self = this, pc, prg, ptr, mem, memSize = 20, pending = null,
       inputCallback = function() { return 0; }, // Signature to set the function
       onOutput = function(byte) { } // Signature to set the function
 
-      self.memSize = 20
+      self.getMemSize = function() { return memSize; }
+      self.setMemSize = function(v) { memSize = v }
       self.getPc = function() { return pc; }
       self.getCmd = function() { return prg.length > 0 && pc >= 0 && pc < prg.length ? prg.charAt(pc) : null; }
       self.getPrg = function() { return prg; }
@@ -135,7 +141,7 @@
         prg = ""
         ptr = 0
         mem = []
-        for(var i = 0; i < self.memSize; ++i) {
+        for(var i = 0; i < memSize; ++i) {
           mem.push(0)
         }
       }
@@ -162,8 +168,8 @@
           default: break;
         }
       }
-      self.incPtr = function() { ptr = ((ptr + 1) % 20) }
-      self.decPtr = function() { ptr = ((ptr - 1 + 20) % 20) }
+      self.incPtr = function() { ptr = ((ptr + 1) % memSize) }
+      self.decPtr = function() { ptr = ((ptr - 1 + memSize) % memSize) }
       self.incDat = function() { ++mem[ptr] }
       self.decDat = function() { --mem[ptr] }
       self.loopStart = function() {
@@ -331,6 +337,12 @@
       self.setDelay = function(v) {
         elm("delay").value = v;
       }
+      self.getMemSize = function() {
+        return elm("memSize").value;
+      }
+      self.setMemSize = function(v) {
+        elm("memSize").value = v;
+      }
     }
 
     function Ctrl(view, bf) {
@@ -403,6 +415,10 @@
       }
       self.reset = function() {
         var prg = bf.getPrg()
+        var s = parseInt(view.getMemSize())
+        var memSize = Math.min((isNaN(s) || s < 20 ? 20 : s), 10000)
+        view.setMemSize(memSize)
+        bf.setMemSize(memSize)
         bf.reset()
         bf.setPrg(prg)
         abort = false
@@ -536,6 +552,10 @@
       <div class="word">Run Delay(ms)</div>
       <div class="desc">Runによる実行で、Cmdを1つ実行した後に待機する時間を指定します。変化を見やすくするためです。1から10000の間が指定できます。</div>
     </div>
+    <div>
+      <div class="word">Memory Size</div>
+      <div class="desc">Memory Sizeを指定します。20から10000の間が指定できます。</div>
+    </div>
 
     <h2>Reference</h2>
     <h3>Source</h3>
@@ -637,7 +657,11 @@
     </div>
     <div>
       <div class="word">Run Delay(ms)</div>
-      <div class="desc">Set wait time after execution one command by Run button. This is to watch good. You can set 1 up to 10000. </div>
+      <div class="desc">Sets wait time after execution one command by Run button. This is to watch good. You can set 1 up to 10000.</div>
+    </div>
+    <div>
+      <div class="word">Memory Size</div>
+      <div class="desc">Sets Memory Size. You can set 1 up to 10000.</div>
     </div>
     <h2>About</h2>
     <h3>Repository</h3>
