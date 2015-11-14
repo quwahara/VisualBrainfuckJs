@@ -137,7 +137,7 @@
       self.finished = function() { return prg.length === 0 || pc >= prg.length; }
       self.isPending = function() { return !!pending; }
       self.reset = function() {
-        pc = -1
+        pc = 0
         prg = ""
         ptr = 0
         mem = []
@@ -155,7 +155,6 @@
           pending()
           return;
         }
-        ++pc
         switch (prg.charAt(pc)) {
           case "+": self.incDat(); break;
           case "-": self.decDat(); break;
@@ -166,6 +165,9 @@
           case ",": self.input(); break;
           case ".": self.output(); break;
           default: break;
+        }
+        if(!pending) {
+          ++pc
         }
       }
       self.incPtr = function() { ptr = ((ptr + 1) % memSize) }
@@ -208,9 +210,12 @@
               }
               if(prg.charAt(pc) === "[") { ++c }
               if(prg.charAt(pc) === "]") { --c }
-              --pc
               if(c === 0) {
+                ++pc
                 pending = null
+              }
+              else {
+                --pc
               }
             };
           })();
@@ -444,6 +449,8 @@
       }
       self.refreshView = function() {
         view.refreshView(bf.getPc(), bf.getCmd(), bf.getPtr(), bf.getDat(), bf.getPrg(), bf.getMem())
+        view.blinkPrgAt(bf.getPc(), bf.isPending())
+        view.blinkMemAt(bf.getPtr())
       }
       self.poke()
     }
@@ -481,7 +488,7 @@
     <div class="sec-desc">実行されるコードです。</div>
     <div>
       <div class="word">pc</div>
-      <div class="desc">プログラムカウンター。注目しているコマンドの位置です。</div>
+      <div class="desc">プログラムカウンター。次に実行されるコマンドの位置です。</div>
     </div>
     <div>
       <div class="word">prg[pc]</div>
@@ -588,7 +595,7 @@
     <div class="sec-desc">Code to execute.</div>
     <div>
       <div class="word">pc</div>
-      <div class="desc">Program counter. Position of interested command.</div>
+      <div class="desc">Program counter. Position of command to be executed next.</div>
     </div>
     <div>
       <div class="word">prg[pc]</div>
