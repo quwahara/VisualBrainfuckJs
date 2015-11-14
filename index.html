@@ -91,6 +91,7 @@
       <button type="button" onclick="ctrl.run()">Run</button>
       <button type="button" onclick="ctrl.abort()">Abort</button>
       <button type="button" onclick="ctrl.step()">Step</button>
+      <button type="button" onclick="ctrl.rerun()">Rerun</button>
       <button type="button" onclick="ctrl.reset()">Reset</button>
       <button type="button" onclick="ctrl.clear()">Clear</button>
     </div>
@@ -395,17 +396,21 @@
       }
       self.run = function() {
         self.reset()
+        self.rerun()
+      }
+      self.rerun = function() {
+        abort = false
         var d = parseInt(view.getDelay())
         var delay = Math.min((isNaN(d) || d <= 0 ? 100 : d), 10000)
         view.setDelay(delay)
-        function run() {
+        function rerun() {
           if(abort || bf.finished()) {
             return;
           }
           self.step()
-          setTimeout(run, delay)
+          setTimeout(rerun, delay)
         }
-        run()
+        rerun()
       }
       self.abort = function() {
         abort = true
@@ -544,6 +549,10 @@
       <div class="desc">pcを1つ進めて、その位置のCmdを実行します。Loopの最中では、対応する角括弧を探します。</div>
     </div>
     <div>
+      <div class="word">Rerun</div>
+      <div class="desc">AbortまたはStepの途中からコードを実行します。</div>
+    </div>
+    <div>
       <div class="word">Reset</div>
       <div class="desc">pcやptr、memを初期化します。</div>
     </div>
@@ -649,6 +658,10 @@
     <div>
       <div class="word">Step</div>
       <div class="desc">Advances program counter one step and execute command at the program counter is pointing. In a loop, it searches other square bracket to be paired.</div>
+    </div>
+    <div>
+      <div class="word">Rerun</div>
+      <div class="desc">Rerun the code in the process of Abort or Step.</div>
     </div>
     <div>
       <div class="word">Reset</div>
